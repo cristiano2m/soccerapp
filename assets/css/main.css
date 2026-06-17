@@ -1,0 +1,361 @@
+/* ══════════════════════════════════════════════
+   SoccerAPP — Variables, reset y tipografía base
+   ══════════════════════════════════════════════ */
+
+:root {
+    --color-primary: #FFD600;
+    --color-dark: #0B0E14;
+    --color-dark-2: #161B26;
+    --color-light: #F5F6FA;
+    --color-white: #FFFFFF;
+    --color-gray: #6B7280;
+    --color-gray-light: #E5E7EB;
+    --color-success: #1FAE5C;
+    --color-danger: #E5484D;
+    --color-warning: #FFC53D;
+    --color-info: #3B9EFF;
+
+    --font-base: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    --max-width: 1200px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-base);
+    color: var(--color-dark);
+    background: var(--color-light);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ── Tipografía ── */
+h1, h2, h3, h4 {
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.text-muted {
+    color: var(--color-gray);
+}
+
+/* ── Material Symbols ── */
+.ms {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1em;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    vertical-align: -0.2em;
+    user-select: none;
+    flex-shrink: 0;
+}
+.ms-filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.ms-lg { font-size: 1.5em; }
+.ms-xl { font-size: 2em; }
+
+/* ── Botones ── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    border: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.05s ease;
+    text-decoration: none;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: var(--color-dark);
+}
+
+.btn-dark {
+    background: var(--color-dark);
+    color: var(--color-white);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-dark);
+    color: var(--color-dark);
+}
+
+.btn-danger {
+    background: var(--color-danger);
+    color: var(--color-white);
+}
+
+.btn-success {
+    background: var(--color-success);
+    color: var(--color-white);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn:hover {
+    filter: brightness(0.95);
+}
+
+/* ── Cards ── */
+.card {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+}
+
+/* ── Badges (estado de partidos) ── */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge-programado { background: var(--color-gray-light); color: var(--color-gray); }
+.badge-en_curso { background: var(--color-danger); color: #fff; animation: pulse 1.5s infinite; }
+.badge-finalizado { background: var(--color-success); color: #fff; }
+.badge-suspendido { background: var(--color-warning); color: var(--color-dark); }
+.badge-wo { background: var(--color-dark); color: #fff; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
+/* ── Tablas ── */
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--color-white);
+    font-size: 0.92rem;
+}
+
+table th, table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-gray-light);
+    white-space: nowrap;
+}
+
+table th {
+    background: var(--color-dark);
+    color: var(--color-white);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+table tbody tr:hover {
+    background: var(--color-light);
+}
+
+/* ── Formularios ── */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+.form-control,
+input[type="text"], input[type="email"], input[type="password"],
+input[type="number"], input[type="date"], input[type="time"], input[type="tel"],
+select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-gray-light);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--color-white);
+}
+
+.form-control:focus,
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.form-row > .form-group {
+    flex: 1;
+    min-width: 160px;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-row input {
+    width: auto;
+}
+
+/* ── Alertas / flash ── */
+.alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.alert-success { background: #E6F7ED; color: var(--color-success); }
+.alert-error { background: #FDECEC; color: var(--color-danger); }
+.alert-info { background: #E7F1FF; color: var(--color-info); }
+
+/* ── Escudo de equipo (placeholder) ── */
+.team-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: #fff;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.team-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Score board (pantalla live) ── */
+.scoreboard {
+    background: var(--color-dark);
+    color: #00FF66;
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    font-family: 'Consolas', monospace;
+}
+
+.scoreboard .score {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.scoreboard .teams {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-danger);
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+.live-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-danger);
+    animation: pulse 1.2s infinite;
+}
+
+/* ── Utilidades responsive ── */
+.grid {
+    display: grid;
+    gap: 20px;
+}
+
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+    }
+}

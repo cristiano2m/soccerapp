@@ -1,0 +1,30 @@
+# Configuración con credenciales reales
+config/config.php
+
+# Uploads de usuarios (logos, imágenes)
+uploads/logos/
+uploads/equipos/
+uploads/jugadores/
+uploads/patrocinadores/
+uploads/torneos/
+
+# Logs
+logs/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Dependencias locales (si se agregan en el futuro)
+vendor/
+node_modules/
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp

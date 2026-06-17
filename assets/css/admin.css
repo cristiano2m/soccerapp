@@ -1,0 +1,291 @@
+/* ══════════════════════════════════════════════
+   SoccerAPP — Estilos panel administrativo
+   ══════════════════════════════════════════════ */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+.admin-sidebar {
+    width: 230px;
+    background: var(--color-dark);
+    color: #C9CDD6;
+    flex-shrink: 0;
+    padding: 20px 0;
+}
+
+.admin-sidebar .brand {
+    color: var(--color-white);
+    font-size: 1.2rem;
+    font-weight: 800;
+    padding: 0 20px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.admin-sidebar .brand span {
+    color: var(--color-primary);
+}
+
+.admin-sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    border-left: 3px solid transparent;
+    transition: background 0.15s ease, color 0.15s ease;
+    color: #C9CDD6;
+}
+
+.admin-sidebar nav a .ms {
+    font-size: 18px;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
+.admin-sidebar nav a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.admin-sidebar nav a:hover .ms {
+    opacity: 1;
+}
+
+.admin-sidebar nav a.active {
+    color: var(--color-primary);
+    background: rgba(255, 214, 0, 0.08);
+    border-left-color: var(--color-primary);
+}
+
+.admin-sidebar nav a.active .ms {
+    opacity: 1;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.torneo-activo-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    gap: 8px;
+}
+
+.torneo-activo-label span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.torneo-activo-label a {
+    color: #C9CDD6;
+    font-size: 1rem;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
+.torneo-activo-label a:hover {
+    color: var(--color-white);
+}
+
+.torneo-url-publica {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 20px 16px;
+    font-size: 0.75rem;
+}
+
+.torneo-url-publica a {
+    color: #6B7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s;
+}
+
+.torneo-url-publica a:hover {
+    color: #C9CDD6;
+}
+
+.btn-copy-url {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #C9CDD6;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.btn-copy-url:hover {
+    background: rgba(255,255,255,0.14);
+}
+
+.admin-sidebar .section-label {
+    padding: 16px 20px 6px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6B7280;
+}
+
+/* ── Contenido principal ── */
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.admin-topbar {
+    background: var(--color-white);
+    box-shadow: var(--shadow);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-topbar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.9rem;
+}
+
+.admin-topbar .user-role {
+    background: var(--color-primary);
+    color: var(--color-dark);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.admin-main {
+    padding: 24px;
+    flex: 1;
+}
+
+.admin-main h1 {
+    font-size: 1.5rem;
+    margin-bottom: 18px;
+}
+
+/* ── Mobile toggle ── */
+.admin-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        position: fixed;
+        left: -230px;
+        top: 0;
+        bottom: 0;
+        z-index: 200;
+        transition: left 0.2s ease;
+        overflow-y: auto;
+    }
+    .admin-sidebar.open {
+        left: 0;
+    }
+    .admin-menu-toggle {
+        display: block;
+    }
+}
+
+/* ── Toolbar de acciones ── */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+/* ── Stats cards dashboard ── */
+.stat-card {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.stat-card .stat-label {
+    color: var(--color-gray);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ── Acciones inline ── */
+.actions {
+    display: flex;
+    gap: 6px;
+}
+
+/* ── Sección colapsable de nómina ── */
+.collapsible-row td {
+    background: var(--color-light);
+}
+
+/* ── Panel árbitro mobile-first (preparado para fase 2) ── */
+.live-action-section {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.live-action-section h3 {
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+/* ── Acta imprimible ── */
+@media print {
+    .admin-sidebar, .admin-topbar, .no-print {
+        display: none !important;
+    }
+    .admin-layout {
+        display: block;
+    }
+    .admin-main {
+        padding: 0;
+    }
+}
