@@ -257,6 +257,7 @@ if ($torneo) {
     $stats['equipos'] = count($equipos);
     $stats['jornadas'] = (int) ($db->queryOne("SELECT COUNT(*) AS c FROM jornadas WHERE torneo_id = ?", [$torneo['id']])['c'] ?? 0);
     $stats['partidos'] = (int) ($db->queryOne("SELECT COUNT(*) AS c FROM partidos WHERE torneo_id = ? AND estado = 'finalizado'", [$torneo['id']])['c'] ?? 0);
+    $patrocinadores = $db->query("SELECT * FROM patrocinadores WHERE torneo_id = ? AND activo = 1 ORDER BY orden ASC, id ASC", [$torneo['id']]);
 }
 
 $pageTitle = 'Inicio';
@@ -330,6 +331,33 @@ require __DIR__ . '/views/layout/header.php';
 </section>
 
 <?php if ($torneo): ?>
+
+<?php if (!empty($patrocinadores)): ?>
+<section class="sponsors-section">
+    <div class="container">
+        <div class="sponsors-header">
+            <span class="ms">verified</span> Auspiciantes
+        </div>
+        <div class="sponsors-grid">
+            <?php foreach ($patrocinadores as $sp): ?>
+            <div class="sponsor-card">
+                <?php if ($sp['url_sitio']): ?>
+                    <a class="sponsor-link" href="<?= h($sp['url_sitio']) ?>" target="_blank" rel="noopener">
+                <?php else: ?>
+                    <div class="sponsor-link">
+                <?php endif; ?>
+                    <?php if ($sp['logo_url']): ?>
+                        <img class="sponsor-logo" src="<?= h($sp['logo_url']) ?>" alt="<?= h($sp['nombre']) ?>">
+                    <?php else: ?>
+                        <span class="sponsor-nombre"><?= h($sp['nombre']) ?></span>
+                    <?php endif; ?>
+                <?php if ($sp['url_sitio']): ?></a><?php else: ?></div><?php endif; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
 
 <?php if ($proximaJornada): ?>
 <section class="section">

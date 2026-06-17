@@ -42,6 +42,11 @@ function initials(string $name): string {
     return count($w) >= 2 ? $w[0][0] . $w[1][0] : substr($w[0], 0, 2);
 }
 
+$patrocinadores = $db->query(
+    "SELECT * FROM patrocinadores WHERE torneo_id = ? AND activo = 1 ORDER BY orden ASC, id ASC",
+    [(int) $torneo['id']]
+);
+
 $accent = $torneo['color_primario'] ?? '#FFD600';
 
 // Contrast: is the accent color dark or light? Simple luminance check
@@ -54,6 +59,7 @@ $onAccent    = $lum > 0.5 ? '#000000' : '#ffffff';
 <head>
 <meta charset="UTF-8">
 <title>Post Jornada <?= $jornada ? (int) $jornada['numero'] : '' ?></title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -330,25 +336,115 @@ body {
     text-transform: uppercase;
     display: flex; align-items: center; justify-content: center; gap: 7px;
 }
+.post-address .ms {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-size: 18px;
+    line-height: 1;
+}
 
 /* ── sponsors ── */
 .post-sponsors {
-    background: #fff;
-    padding: 10px 20px;
+    background: #ffffff;
+    padding: 10px 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-top: 3px solid <?= h($accent) ?>;
+}
+.post-sponsors-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #555;
+}
+.post-sponsors-label .ms {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-size: 16px;
+    line-height: 1;
+    color: <?= h($accent) ?>;
+}
+.post-sponsors-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e0e0e0;
+    margin-left: 6px;
+}
+.post-sponsors-grid {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+}
+.post-sponsors-grid {
+    align-items: center;
+}
+.sp-card {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    min-height: 54px;
-    border-top: 1px solid #e8ecf0;
+    min-width: 0;
 }
-.sp-img { height: 34px; object-fit: contain; }
+.sp-img {
+    width: 100%;
+    min-height: 100px;
+    max-height: 100px;
+    object-fit: contain;
+    display: block;
+}
 .sp-ph {
-    height: 32px; padding: 0 14px;
-    background: #f0f2f5; border-radius: 4px;
-    display: flex; align-items: center;
-    font-size: 0.68rem; font-weight: 700; color: #aaa;
-    text-transform: uppercase; letter-spacing: 0.07em;
+    flex: 1;
+    min-width: 0;
+    height: 100px;
+    background: #f5f5f5;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #bbb;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.sp-ph {
+    height: 38px;
+    width: 80px;
+    background: rgba(255,255,255,0.06);
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.post-footer-bar {
+    background: <?= h($accent) ?>;
+    color: <?= h($onAccent) ?>;
+    text-align: center;
+    padding: 5px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.post-footer-bar .ms {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-size: 13px;
 }
 </style>
 </head>
@@ -567,16 +663,38 @@ function copiarCaption() {
     <!-- DIRECCIÓN -->
     <?php if (!empty($torneo['cancha_principal'])): ?>
     <div class="post-address">
-        📍 CAMPOS UBICADOS EN: <?= h($torneo['cancha_principal']) ?>
+        <span class="ms">location_on</span> CAMPOS UBICADOS EN: <?= h($torneo['cancha_principal']) ?>
     </div>
     <?php endif; ?>
 
     <!-- SPONSORS -->
     <div class="post-sponsors">
-        <div class="sp-ph">Patrocinador 1</div>
-        <div class="sp-ph">Patrocinador 2</div>
-        <div class="sp-ph">Patrocinador 3</div>
-        <div class="sp-ph">Patrocinador 4</div>
+        <div class="post-sponsors-label">
+            <span class="ms">verified</span> Auspiciantes
+        </div>
+        <div class="post-sponsors-grid">
+            <?php if (!empty($patrocinadores)): ?>
+                <?php foreach ($patrocinadores as $sp): ?>
+                <div class="sp-card">
+                    <?php if (!empty($sp['logo_url'])): ?>
+                        <img class="sp-img" src="<?= h($sp['logo_url']) ?>" alt="<?= h($sp['nombre']) ?>">
+                    <?php else: ?>
+                        <div class="sp-ph"><?= h(mb_strtoupper(mb_substr($sp['nombre'], 0, 10))) ?></div>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="sp-ph">Sponsor 1</div>
+                <div class="sp-ph">Sponsor 2</div>
+                <div class="sp-ph">Sponsor 3</div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- FOOTER BAR -->
+    <div class="post-footer-bar">
+        <span class="ms">sports_soccer</span>
+        <?= h(strtoupper($torneo['nombre'])) ?> · <?= (int) $torneo['anio'] ?>
     </div>
 
 </div>

@@ -45,7 +45,10 @@ $torneoActivo = !empty($_SESSION['torneo_id'])
             <a class="<?= nav_active($current, '/admin/calendario/') ?>" href="<?= BASE_URL ?>/admin/calendario/index.php"><span class="ms">calendar_month</span> Calendario</a>
             <a class="<?= nav_active($current, '/admin/canchas/') ?>" href="<?= BASE_URL ?>/admin/canchas/index.php"><span class="ms">stadium</span> Canchas</a>
             <a class="<?= nav_active($current, '/admin/resultados/') ?>" href="<?= BASE_URL ?>/admin/resultados/index.php"><span class="ms">sports_soccer</span> Resultados</a>
-            <a class="<?= nav_active($current, '/admin/posts/') ?>" href="<?= BASE_URL ?>/admin/posts/jornada.php"><span class="ms">photo_camera</span> Post Jornada</a>
+            <div class="section-label" style="font-size:0.65rem;padding-left:16px;margin-top:4px;">Posts Redes</div>
+            <a class="<?= nav_active($current, '/admin/posts/jornada') ?>" href="<?= BASE_URL ?>/admin/posts/jornada.php"><span class="ms">calendar_month</span> Jornada</a>
+            <a class="<?= nav_active($current, '/admin/posts/resultados') ?>" href="<?= BASE_URL ?>/admin/posts/resultados.php"><span class="ms">scoreboard</span> Resultados</a>
+            <a class="<?= nav_active($current, '/admin/posts/posiciones') ?>" href="<?= BASE_URL ?>/admin/posts/posiciones.php"><span class="ms">leaderboard</span> Posiciones</a>
             <a class="<?= nav_active($current, '/admin/patrocinadores/') ?>" href="<?= BASE_URL ?>/admin/patrocinadores/index.php"><span class="ms">verified</span> Patrocinadores</a>
             <?php endif; ?>
             <?php if ($user['rol'] === 'super_admin'): ?>
