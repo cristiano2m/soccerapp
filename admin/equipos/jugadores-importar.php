@@ -63,6 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cedula = trim($datos[4] ?? '');
         $activoRaw = trim($datos[5] ?? '');
         $activo = $activoRaw === '0' ? 0 : 1;
+        $fotoNombre = basename(trim($datos[6] ?? ''));
+        $fotoUrl = $fotoNombre !== '' ? UPLOADS_URL . '/jugadores/' . $fotoNombre : null;
 
         $equipoId = $equiposPorNombre[mb_strtolower($nombreEquipo)] ?? null;
         if ($equipoId === null) {
@@ -73,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errores[] = "Fila $numFila: el nombre del jugador es obligatorio.";
             continue;
         }
-        if (!ctype_digit($numero) || (int) $numero < 1 || (int) $numero > 99) {
-            $errores[] = "Fila $numFila: el número \"$numero\" debe ser un valor entre 1 y 99.";
+        if (!ctype_digit($numero) || (int) $numero > 999) {
+            $errores[] = "Fila $numFila: el número \"$numero\" debe ser un valor entre 0 y 999.";
             continue;
         }
         if (!in_array($posicion, $posiciones, true)) {
@@ -89,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'posicion' => $posicion,
             'cedula' => $cedula,
             'activo' => $activo,
+            'fotoUrl' => $fotoUrl,
         ];
     }
     fclose($handle);
@@ -111,14 +114,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 if ($existente) {
                     $db->execute(
-                        "UPDATE jugadores SET nombre=?, posicion=?, cedula=?, activo=? WHERE id=?",
-                        [$f['nombre'], $f['posicion'], $f['cedula'], $f['activo'], $existente['id']]
+                        "UPDATE jugadores SET nombre=?, posicion=?, cedula=?, activo=?, foto_url=COALESCE(?, foto_url) WHERE id=?",
+                        [$f['nombre'], $f['posicion'], $f['cedula'], $f['activo'], $f['fotoUrl'], $existente['id']]
                     );
                     $actualizados++;
                 } else {
                     $db->insert(
-                        "INSERT INTO jugadores (equipo_id, nombre, numero, posicion, cedula, activo) VALUES (?,?,?,?,?,?)",
-                        [$f['equipoId'], $f['nombre'], $f['numero'], $f['posicion'], $f['cedula'], $f['activo']]
+                        "INSERT INTO jugadores (equipo_id, nombre, numero, posicion, cedula, activo, foto_url) VALUES (?,?,?,?,?,?,?)",
+                        [$f['equipoId'], $f['nombre'], $f['numero'], $f['posicion'], $f['cedula'], $f['activo'], $f['fotoUrl']]
                     );
                     $creados++;
                 }
@@ -140,7 +143,10 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
 ?>
 <div class="toolbar">
     <h1>📥 Importar jugadores (CSV)</h1>
-    <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/index.php">Volver a equipos</a>
+    <div class="actions">
+        <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/jugadores-fotos-importar.php">🖼️ Importar fotos (ZIP)</a>
+        <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/index.php">Volver a equipos</a>
+    </div>
 </div>
 
 <?php if ($resultado && !empty($resultado['errores'])): ?>
@@ -192,18 +198,19 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
                 <tbody>
                     <tr><td>1</td><td>equipo</td><td>Sí</td><td>Debe existir en Equipos</td></tr>
                     <tr><td>2</td><td>nombre</td><td>Sí</td><td>Nombre del jugador</td></tr>
-                    <tr><td>3</td><td>numero</td><td>Sí</td><td>Entre 1 y 99</td></tr>
+                    <tr><td>3</td><td>numero</td><td>Sí</td><td>Entre 0 y 999</td></tr>
                     <tr><td>4</td><td>posicion</td><td>Sí</td><td>Portero, Defensa, Mediocampista o Delantero</td></tr>
                     <tr><td>5</td><td>cedula</td><td>No</td><td>ID del jugador</td></tr>
                     <tr><td>6</td><td>activo</td><td>No</td><td>1 o 0 (por defecto 1)</td></tr>
+                    <tr><td>7</td><td>foto</td><td>No</td><td>Nombre de archivo (ej. 2601.jpg). Debe existir ya en uploads/jugadores/. Vacío = sin foto / no cambia la foto actual</td></tr>
                 </tbody>
             </table>
         </div>
         <p class="text-muted" style="margin-top:12px;">Ejemplo:</p>
-        <pre style="background:#f5f5f5; padding:10px; border-radius:6px; overflow-x:auto; font-size:0.85rem;">equipo,nombre,numero,posicion,cedula,activo
-Tigres FC,Juan Pérez,7,Delantero,0102030405,1
-Cóndores FC,Pedro Gómez,3,Defensa,,1</pre>
-        <p class="text-muted">Si ya existe un jugador con ese número en ese equipo, se actualizan sus datos en lugar de crear uno duplicado.</p>
+        <pre style="background:#f5f5f5; padding:10px; border-radius:6px; overflow-x:auto; font-size:0.85rem;">equipo,nombre,numero,posicion,cedula,activo,foto
+Tigres FC,Juan Pérez,7,Delantero,0102030405,1,2601.jpg
+Cóndores FC,Pedro Gómez,3,Defensa,,1,</pre>
+        <p class="text-muted">Si ya existe un jugador con ese número en ese equipo, se actualizan sus datos en lugar de crear uno duplicado. Si la columna foto viene vacía, se conserva la foto que ya tenía.</p>
     </div>
 </div>
 <?php require __DIR__ . '/../../views/layout/footer.php'; ?>

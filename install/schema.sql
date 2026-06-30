@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS jugadores (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     equipo_id INT UNSIGNED NOT NULL,
     nombre VARCHAR(100) NOT NULL,
-    numero TINYINT UNSIGNED NOT NULL,
+    numero SMALLINT UNSIGNED NOT NULL,
     posicion ENUM('Portero','Defensa','Mediocampista','Delantero') NOT NULL,
     cedula VARCHAR(20),
     foto_url VARCHAR(255),

@@ -46,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($nombre === '') {
                 $errors[] = 'El nombre del jugador es obligatorio.';
             }
-            if ($numero < 1 || $numero > 99) {
-                $errors[] = 'El número de camiseta debe estar entre 1 y 99.';
+            if ($numero < 0 || $numero > 999) {
+                $errors[] = 'El número de camiseta debe estar entre 0 y 999.';
             }
             if (!in_array($posicion, $posiciones, true)) {
                 $errors[] = 'Selecciona una posición válida.';
@@ -119,6 +119,7 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
     <h1><?= team_badge($equipo['nombre'], $equipo['abreviatura'], $equipo['color_hex'], $equipo['logo_url'], 28) ?> Nómina · <?= h($equipo['nombre']) ?></h1>
     <div class="actions">
         <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/jugadores-importar.php">📥 Importar CSV</a>
+        <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/jugadores-fotos-importar.php?equipo_id=<?= $equipo['id'] ?>">🖼️ Importar fotos (ZIP)</a>
         <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/index.php">← Volver a equipos</a>
     </div>
 </div>
@@ -143,7 +144,7 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
             <div class="form-row">
                 <div class="form-group" style="max-width:120px;">
                     <label for="numero">Número</label>
-                    <input type="number" id="numero" name="numero" value="<?= h((string) ($editJugador['numero'] ?? '')) ?>" required min="1" max="99">
+                    <input type="number" id="numero" name="numero" value="<?= h((string) ($editJugador['numero'] ?? '')) ?>" required min="0" max="999">
                 </div>
                 <div class="form-group">
                     <label for="posicion">Posición</label>

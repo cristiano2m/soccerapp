@@ -104,6 +104,14 @@ function handle_image_upload(string $field, string $subdir, ?string $oldUrl = nu
         throw new Exception('Error al subir el archivo.');
     }
 
+    return guardar_imagen_validada($file['tmp_name'], (int) $file['size'], $subdir, $oldUrl, true);
+}
+
+// Valida (mime/tamaño) y guarda una imagen en uploads/$subdir/, devolviendo su URL pública.
+// $esTmpSubida=true usa move_uploaded_file (origen viene de $_FILES); false usa rename
+// (origen es un archivo temporal propio, p.ej. extraído de un ZIP).
+function guardar_imagen_validada(string $rutaOrigen, int $tamano, string $subdir, ?string $oldUrl, bool $esTmpSubida): string
+{
     $allowed = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
@@ -111,12 +119,12 @@ function handle_image_upload(string $field, string $subdir, ?string $oldUrl = nu
         'image/gif' => 'gif',
     ];
 
-    $mime = mime_content_type($file['tmp_name']);
+    $mime = mime_content_type($rutaOrigen);
     if (!isset($allowed[$mime])) {
         throw new Exception('Formato de imagen no permitido (usa JPG, PNG, WEBP o GIF).');
     }
 
-    if ($file['size'] > 2 * 1024 * 1024) {
+    if ($tamano > 2 * 1024 * 1024) {
         throw new Exception('La imagen no debe superar 2 MB.');
     }
 
@@ -126,7 +134,9 @@ function handle_image_upload(string $field, string $subdir, ?string $oldUrl = nu
     }
 
     $filename = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
-    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $filename)) {
+    $destino = $dir . '/' . $filename;
+    $movido = $esTmpSubida ? move_uploaded_file($rutaOrigen, $destino) : rename($rutaOrigen, $destino);
+    if (!$movido) {
         throw new Exception('No se pudo guardar la imagen.');
     }
 
