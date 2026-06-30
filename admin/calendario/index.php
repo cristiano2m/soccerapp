@@ -24,7 +24,7 @@ if (!empty($jornadas)) {
          JOIN equipos ev ON ev.id = p.equipo_visita_id
          LEFT JOIN resultados r ON r.partido_id = p.id
          WHERE p.torneo_id = ?
-         ORDER BY p.jornada_id ASC, p.hora ASC, p.id ASC",
+         ORDER BY p.jornada_id ASC, p.hora ASC, p.cancha ASC, p.id ASC",
         [$torneo['id']]
     );
     foreach ($partidos as $p) {
@@ -52,6 +52,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'activ
     }
     redirect('/admin/calendario/index.php');
 }
+
+// ── Acción: editar cancha/hora directamente desde el listado ──────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'actualizar_horario') {
+    // Preserva ?t=ID en los redirects para no perder el torneo activo.
+    $qs = !empty($_GET['t']) ? '?t=' . (int) $_GET['t'] : '';
+
+    if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+        set_flash('error', 'Token de seguridad inválido.');
+        redirect('/admin/calendario/index.php' . $qs);
+    }
+    $partidoId = (int) ($_POST['partido_id'] ?? 0);
+    $cancha = trim($_POST['cancha'] ?? '');
+    $hora = trim($_POST['hora'] ?? '');
+
+    $partidoOk = $db->queryOne("SELECT id FROM partidos WHERE id = ? AND torneo_id = ?", [$partidoId, $torneo['id']]);
+    if (!$partidoOk) {
+        set_flash('error', 'Partido no encontrado.');
+        redirect('/admin/calendario/index.php' . $qs);
+    }
+    if ($hora !== '' && !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $hora)) {
+        set_flash('error', 'Formato de hora no válido.');
+        redirect('/admin/calendario/index.php' . $qs);
+    }
+
+    $db->execute(
+        "UPDATE partidos SET cancha = ?, hora = ? WHERE id = ?",
+        [$cancha !== '' ? $cancha : null, $hora !== '' ? $hora : null, $partidoId]
+    );
+    set_flash('success', 'Horario actualizado.');
+    redirect('/admin/calendario/index.php' . $qs . '#partido-' . $partidoId);
+}
+
+$canchas = $db->query("SELECT * FROM canchas WHERE torneo_id = ? AND activo = 1 ORDER BY nombre ASC", [$torneo['id']]);
 
 $numEquipos = (int) ($db->queryOne("SELECT COUNT(*) AS c FROM equipos WHERE torneo_id = ? AND activo = 1", [$torneo['id']])['c'] ?? 0);
 
@@ -125,7 +158,7 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
                 </thead>
                 <tbody>
                     <?php foreach ($pJornada as $p): ?>
-                    <tr>
+                    <tr id="partido-<?= (int) $p['id'] ?>">
                         <td><div class="team-row"><?= team_badge($p['local_nombre'], $p['local_abrev'], $p['local_color'], $p['local_logo'], 24) ?> <?= h($p['local_nombre']) ?></div></td>
                         <td class="pts">
                             <?php if ($p['goles_local'] !== null): ?>
@@ -135,8 +168,43 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
                             <?php endif; ?>
                         </td>
                         <td><div class="team-row"><?= team_badge($p['visita_nombre'], $p['visita_abrev'], $p['visita_color'], $p['visita_logo'], 24) ?> <?= h($p['visita_nombre']) ?></div></td>
-                        <td><?= h($p['cancha'] ?? '') ?></td>
-                        <td><?= $p['hora'] ? h(substr($p['hora'], 0, 5)) : '-' ?></td>
+                        <td x-data="{ editando: false }">
+                            <span x-show="!editando" @click="editando = true" style="cursor:pointer;" title="Clic para editar"><?= h($p['cancha'] ?? '') ?: '—' ?></span>
+                            <form x-show="editando" method="post" style="display:flex;gap:4px;align-items:center;" @click.outside="editando = false">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="accion" value="actualizar_horario">
+                                <input type="hidden" name="partido_id" value="<?= (int) $p['id'] ?>">
+                                <input type="hidden" name="hora" value="<?= $p['hora'] ? h(substr($p['hora'], 0, 5)) : '' ?>">
+                                <select name="cancha" class="btn-sm" autofocus>
+                                    <option value="">-- Sin asignar --</option>
+                                    <?php
+                                    $canchaActual = $p['cancha'] ?? '';
+                                    $canchaEnLista = false;
+                                    foreach ($canchas as $c) {
+                                        if ($c['nombre'] === $canchaActual) $canchaEnLista = true;
+                                    }
+                                    ?>
+                                    <?php if ($canchaActual !== '' && !$canchaEnLista): ?>
+                                        <option value="<?= h($canchaActual) ?>" selected><?= h($canchaActual) ?></option>
+                                    <?php endif; ?>
+                                    <?php foreach ($canchas as $c): ?>
+                                        <option value="<?= h($c['nombre']) ?>" <?= $canchaActual === $c['nombre'] ? 'selected' : '' ?>><?= h($c['nombre']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm" title="Guardar"><span class="ms">check</span></button>
+                            </form>
+                        </td>
+                        <td x-data="{ editando: false }">
+                            <span x-show="!editando" @click="editando = true" style="cursor:pointer;" title="Clic para editar"><?= $p['hora'] ? h(substr($p['hora'], 0, 5)) : '-' ?></span>
+                            <form x-show="editando" method="post" style="display:flex;gap:4px;align-items:center;" @click.outside="editando = false">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="accion" value="actualizar_horario">
+                                <input type="hidden" name="partido_id" value="<?= (int) $p['id'] ?>">
+                                <input type="hidden" name="cancha" value="<?= h($p['cancha'] ?? '') ?>">
+                                <input type="time" name="hora" value="<?= $p['hora'] ? h(substr($p['hora'], 0, 5)) : '' ?>" autofocus style="max-width:110px;">
+                                <button type="submit" class="btn btn-primary btn-sm" title="Guardar"><span class="ms">check</span></button>
+                            </form>
+                        </td>
                         <td>
                             <span class="badge badge-<?= h($p['estado']) ?>"><?= h(str_replace('_', ' ', $p['estado'])) ?></span>
                             <?php if (!empty($p['wo_local']) || !empty($p['wo_visita'])): ?> <span class="badge badge-wo">W.O.</span><?php endif; ?>

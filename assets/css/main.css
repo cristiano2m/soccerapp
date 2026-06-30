@@ -217,6 +217,15 @@ table tbody tr:hover {
     background: var(--color-light);
 }
 
+table tbody tr:target {
+    animation: row-highlight 2s ease-out;
+}
+
+@keyframes row-highlight {
+    from { background: #FFF3CD; }
+    to { background: transparent; }
+}
+
 /* ── Formularios ── */
 .form-group {
     margin-bottom: 16px;
