@@ -219,6 +219,38 @@ switch ($resource) {
         api_error(404, "Sub-recurso '{$sub}' no existe en /partidos.");
         break;
 
+    // ── /equipos ─────────────────────────────────────────────────────────────
+    case 'equipos':
+        if ($id === null) {
+            api_error(400, 'Se requiere el ID del equipo: /api/v1/equipos/{id}/jugadores');
+        }
+
+        $equipo = $db->queryOne("SELECT * FROM equipos WHERE id = ?", [$id]);
+        if (!$equipo) {
+            api_error(404, "Equipo #{$id} no encontrado.");
+        }
+
+        if ($sub === null) {
+            // GET /api/v1/equipos/{id}
+            $equipo['total_jugadores'] = (int) ($db->queryOne("SELECT COUNT(*) c FROM jugadores WHERE equipo_id = ? AND activo = 1", [$id])['c'] ?? 0);
+            api_json($equipo);
+        }
+
+        if ($sub === 'jugadores') {
+            // GET /api/v1/equipos/{id}/jugadores
+            $jugadores = $db->query(
+                "SELECT id, nombre, numero, posicion, foto_url
+                 FROM jugadores
+                 WHERE equipo_id = ? AND activo = 1
+                 ORDER BY numero ASC",
+                [$id]
+            );
+            api_json($jugadores, ['equipo_id' => $id, 'equipo_nombre' => $equipo['nombre'], 'total' => count($jugadores)]);
+        }
+
+        api_error(404, "Sub-recurso '{$sub}' no existe en /equipos.");
+        break;
+
     // ── / (raíz) ─────────────────────────────────────────────────────────────
     case '':
         api_json([
@@ -235,6 +267,8 @@ switch ($resource) {
                 'GET /api/v1/torneos/{id}/patrocinadores'    => 'Patrocinadores',
                 'GET /api/v1/partidos/{id}'                  => 'Detalle de partido',
                 'GET /api/v1/partidos/{id}/live'             => 'Marcador en tiempo real',
+                'GET /api/v1/equipos/{id}'                   => 'Detalle de un equipo',
+                'GET /api/v1/equipos/{id}/jugadores'         => 'Jugadores activos del equipo',
             ],
         ]);
         break;

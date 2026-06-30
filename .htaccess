@@ -3,7 +3,7 @@ ServerSignature Off
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+    RewriteBase /torneo/
 
     # API REST v1 — pasar el header Authorization a PHP
     RewriteCond %{HTTP:Authorization} .
