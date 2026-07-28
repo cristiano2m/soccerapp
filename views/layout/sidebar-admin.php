@@ -50,6 +50,8 @@ $torneoActivo = !empty($_SESSION['torneo_id'])
             <a class="<?= nav_active($current, '/admin/posts/resultados') ?>" href="<?= BASE_URL ?>/admin/posts/resultados.php"><span class="ms">scoreboard</span> Resultados</a>
             <a class="<?= nav_active($current, '/admin/posts/posiciones') ?>" href="<?= BASE_URL ?>/admin/posts/posiciones.php"><span class="ms">leaderboard</span> Posiciones</a>
             <a class="<?= nav_active($current, '/admin/patrocinadores/') ?>" href="<?= BASE_URL ?>/admin/patrocinadores/index.php"><span class="ms">verified</span> Patrocinadores</a>
+            <div class="section-label" style="font-size:0.65rem;padding-left:16px;margin-top:4px;">Reportes</div>
+            <a class="<?= nav_active($current, '/admin/reportes/tarjetas-rojas') ?>" href="<?= BASE_URL ?>/admin/reportes/tarjetas-rojas.php"><span class="ms">style</span> Tarjetas Rojas</a>
             <?php endif; ?>
             <?php if ($user['rol'] === 'super_admin'): ?>
             <div class="section-label">Sistema</div>

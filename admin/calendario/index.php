@@ -88,6 +88,13 @@ $canchas = $db->query("SELECT * FROM canchas WHERE torneo_id = ? AND activo = 1 
 
 $numEquipos = (int) ($db->queryOne("SELECT COUNT(*) AS c FROM equipos WHERE torneo_id = ? AND activo = 1", [$torneo['id']])['c'] ?? 0);
 
+// Bloqueo del botón generar: si ya hay resultados registrados, solo super_admin puede regenerar
+$hayResultados = (bool) ($db->queryOne(
+    "SELECT 1 FROM resultados r JOIN partidos p ON p.id = r.partido_id WHERE p.torneo_id = ? LIMIT 1",
+    [$torneo['id']]
+)['1'] ?? false);
+$esSuperAdmin = ($_SESSION['rol'] ?? '') === 'super_admin';
+
 $pageTitle = 'Calendario';
 $layout = 'admin';
 require __DIR__ . '/../../views/layout/header.php';
@@ -98,16 +105,29 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
     <div class="actions">
         <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/calendario/importar.php"><span class="ms">upload_file</span> Importar CSV</a>
         <?php if ($numEquipos >= 2): ?>
-        <form method="post" action="<?= BASE_URL ?>/admin/calendario/generar.php" onsubmit="return confirm('<?= empty($jornadas) ? '¿Generar el calendario round-robin?' : '¿Regenerar el calendario? Se eliminarán las jornadas y partidos actuales (y sus resultados).' ?>');">
-            <?= csrf_field() ?>
-            <button type="submit" class="btn btn-primary">
-                <?php if (empty($jornadas)): ?>
-                    <span class="ms">settings</span> Generar calendario
-                <?php else: ?>
-                    <span class="ms">refresh</span> Regenerar calendario
-                <?php endif; ?>
+            <?php if ($hayResultados && !$esSuperAdmin): ?>
+            <button type="button" class="btn btn-primary" disabled title="Ya existen resultados registrados. Solo el administrador puede regenerar el calendario.">
+                <span class="ms">lock</span> Generar calendario
             </button>
-        </form>
+            <?php else: ?>
+            <form method="post" action="<?= BASE_URL ?>/admin/calendario/generar.php"
+                  onsubmit="return confirm('<?= empty($jornadas)
+                      ? '¿Generar el calendario round-robin?'
+                      : ($hayResultados
+                          ? '⚠️ ADVERTENCIA: Ya existen resultados registrados. Regenerar el calendario eliminará TODOS los partidos, resultados, goles y tarjetas. Esta acción no se puede deshacer. ¿Está seguro?'
+                          : '¿Regenerar el calendario? Se eliminarán las jornadas y partidos actuales (y sus resultados).') ?>');">
+                <?= csrf_field() ?>
+                <button type="submit" class="btn <?= $hayResultados ? 'btn-danger' : 'btn-primary' ?>">
+                    <?php if (empty($jornadas)): ?>
+                        <span class="ms">settings</span> Generar calendario
+                    <?php elseif ($hayResultados): ?>
+                        <span class="ms">warning</span> Regenerar (hay resultados)
+                    <?php else: ?>
+                        <span class="ms">refresh</span> Regenerar calendario
+                    <?php endif; ?>
+                </button>
+            </form>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
