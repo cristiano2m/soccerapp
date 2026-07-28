@@ -57,6 +57,7 @@ $flashMsg = get_flash();
                     <a href="<?= BASE_URL ?>/public/calendario.php<?= $tQs ?>">Calendario</a>
                     <a href="<?= BASE_URL ?>/public/resultados.php<?= $tQs ?>">Resultados</a>
                     <a href="<?= BASE_URL ?>/public/posiciones.php<?= $tQs ?>">Posiciones</a>
+                    <a href="<?= BASE_URL ?>/public/jornada-texto.php<?= $tQs ?>">Jornada</a>
                 <?php endif; ?>
                 <?php if (is_logged_in()): ?>
                     <a href="<?= BASE_URL ?>/admin/dashboard.php" class="btn btn-primary btn-sm">Panel Admin</a>
