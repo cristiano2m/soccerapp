@@ -40,8 +40,8 @@ if ($rolActivo === 'referee' && $partido['estado'] !== 'finalizado') {
 }
 
 // Jugadores de cada equipo
-$jugadoresLocal  = $db->query("SELECT * FROM jugadores WHERE equipo_id = ? ORDER BY numero ASC", [$partido['local_id']]);
-$jugadoresVisita = $db->query("SELECT * FROM jugadores WHERE equipo_id = ? ORDER BY numero ASC", [$partido['visita_id']]);
+$jugadoresLocal  = $db->query("SELECT * FROM jugadores WHERE equipo_id = ? AND activo = 1 ORDER BY numero ASC", [$partido['local_id']]);
+$jugadoresVisita = $db->query("SELECT * FROM jugadores WHERE equipo_id = ? AND activo = 1 ORDER BY numero ASC", [$partido['visita_id']]);
 
 // Estadísticas G/A/R por jugador
 $golesPartido    = $db->query("SELECT jugador_id, tipo FROM goles   WHERE partido_id = ?", [$id]);
@@ -60,6 +60,36 @@ foreach ($tarjetasPartido as $t) {
     }
     if (in_array($t['tipo'], ['roja', 'doble_amarilla'], true)) {
         $statsJugador[$jid]['r'] = ($statsJugador[$jid]['r'] ?? 0) + 1;
+    }
+}
+
+// Jugadores suspendidos:
+// - doble_amarilla o roja de jornada anterior  → suspendido (partido 1)
+// - roja directa de hace dos jornadas          → suspendido (partido 2 de 2)
+$suspendidos = [];
+$jornadaNum = (int) $partido['jornada_numero'];
+$condiciones = [];
+$paramsSusp  = [$torneo['id']];
+
+if ($jornadaNum - 1 > 0) {
+    $condiciones[] = "(t.tipo IN ('roja','doble_amarilla') AND j.numero = ?)";
+    $paramsSusp[]  = $jornadaNum - 1;
+}
+if ($jornadaNum - 2 > 0) {
+    $condiciones[] = "(t.tipo = 'roja' AND j.numero = ?)";
+    $paramsSusp[]  = $jornadaNum - 2;
+}
+if (!empty($condiciones)) {
+    $filasSusp = $db->query(
+        "SELECT DISTINCT t.jugador_id
+         FROM tarjetas t
+         JOIN partidos p ON p.id = t.partido_id
+         JOIN jornadas j ON j.id = p.jornada_id
+         WHERE j.torneo_id = ? AND (" . implode(' OR ', $condiciones) . ")",
+        $paramsSusp
+    );
+    foreach ($filasSusp as $s) {
+        $suspendidos[$s['jugador_id']] = true;
     }
 }
 
@@ -218,6 +248,7 @@ if ($rolActivo === 'referee') {
     font-weight: 700;
     text-align: left;
     background: #f5f5f5;
+    color: #000;
 }
 .acta-jugadores td {
     border: 1px solid #000;
@@ -355,13 +386,13 @@ if ($rolActivo === 'referee') {
     <table class="acta-equipos">
         <tr>
             <td class="equipo-label">EQUIPO 1</td>
-            <td class="equipo-nombre"><?= h($partido['local_nombre']) ?></td>
+            <td class="equipo-nombre"><?= h($partido['local_nombre']) ?> <span style="font-size:7.5pt;font-weight:400;color:#666;">(<?= count($jugadoresLocal) ?>)</span></td>
             <td class="marcador-box">
                 <?= $partido['goles_local'] !== null ? (int) $partido['goles_local'] : '' ?>
             </td>
             <td class="separador"></td>
             <td class="equipo-label">EQUIPO 2</td>
-            <td class="equipo-nombre"><?= h($partido['visita_nombre']) ?></td>
+            <td class="equipo-nombre"><?= h($partido['visita_nombre']) ?> <span style="font-size:7.5pt;font-weight:400;color:#666;">(<?= count($jugadoresVisita) ?>)</span></td>
             <td class="marcador-box">
                 <?= $partido['goles_visita'] !== null ? (int) $partido['goles_visita'] : '' ?>
             </td>
@@ -394,13 +425,23 @@ if ($rolActivo === 'referee') {
         ?>
             <tr>
                 <td class="col-no"><?= $jl ? (int) $jl['numero'] : '' ?></td>
-                <td class="col-nombre"><?= $jl ? h($jl['nombre']) : '' ?></td>
+                <td class="col-nombre">
+                    <?= $jl ? h($jl['nombre']) : '' ?>
+                    <?php if ($jl && !empty($suspendidos[$jl['id']])): ?>
+                        <span style="color:#c00;font-size:6pt;font-weight:700;display:block;">(con tarjeta roja)</span>
+                    <?php endif; ?>
+                </td>
                 <td class="col-stat"><?= !empty($sl['g']) ? $sl['g'] : '' ?></td>
                 <td class="col-stat"><?= !empty($sl['a']) ? $sl['a'] : '' ?></td>
                 <td class="col-stat"><?= !empty($sl['r']) ? $sl['r'] : '' ?></td>
                 <td class="col-sep"></td>
                 <td class="col-no"><?= $jv ? (int) $jv['numero'] : '' ?></td>
-                <td class="col-nombre"><?= $jv ? h($jv['nombre']) : '' ?></td>
+                <td class="col-nombre">
+                    <?= $jv ? h($jv['nombre']) : '' ?>
+                    <?php if ($jv && !empty($suspendidos[$jv['id']])): ?>
+                        <span style="color:#c00;font-size:6pt;font-weight:700;display:block;">(con tarjeta roja)</span>
+                    <?php endif; ?>
+                </td>
                 <td class="col-stat"><?= !empty($sv['g']) ? $sv['g'] : '' ?></td>
                 <td class="col-stat"><?= !empty($sv['a']) ? $sv['a'] : '' ?></td>
                 <td class="col-stat"><?= !empty($sv['r']) ? $sv['r'] : '' ?></td>

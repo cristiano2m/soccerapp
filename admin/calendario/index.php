@@ -86,6 +86,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'actua
 
 $canchas = $db->query("SELECT * FROM canchas WHERE torneo_id = ? AND activo = 1 ORDER BY nombre ASC", [$torneo['id']]);
 
+// Jornada que actualmente tiene partidos en_curso (solo puede haber una activa)
+$jornadaEnCurso = $db->queryOne(
+    "SELECT DISTINCT p.jornada_id FROM partidos p WHERE p.torneo_id = ? AND p.estado = 'en_curso' LIMIT 1",
+    [$torneo['id']]
+);
+$jornadaEnCursoId = $jornadaEnCurso ? (int) $jornadaEnCurso['jornada_id'] : null;
+
 $numEquipos = (int) ($db->queryOne("SELECT COUNT(*) AS c FROM equipos WHERE torneo_id = ? AND activo = 1", [$torneo['id']])['c'] ?? 0);
 
 // Bloqueo del botón generar: si ya hay resultados registrados, solo super_admin puede regenerar
@@ -153,14 +160,21 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
                 <?= !empty($jornada['fecha']) ? '<span class="text-muted" style="font-weight:400;font-size:0.85rem;"> · ' . h($jornada['fecha']) . '</span>' : '' ?>
             </h2>
             <?php if ($hayProgramado): ?>
-            <form method="post" onsubmit="return confirm('¿Poner todos los partidos programados de la Jornada <?= (int) $jornada['numero'] ?> en curso?');" style="margin:0;">
-                <?= csrf_field() ?>
-                <input type="hidden" name="accion" value="activar_jornada">
-                <input type="hidden" name="jornada_id" value="<?= (int) $jornada['id'] ?>">
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <span class="ms">play_circle</span> Iniciar jornada
+                <?php if ($jornadaEnCursoId !== null && $jornadaEnCursoId !== (int) $jornada['id']): ?>
+                <button type="button" class="btn btn-outline btn-sm" disabled
+                        title="Hay una jornada en curso. Finaliza esa jornada antes de iniciar otra.">
+                    <span class="ms">lock</span> Iniciar jornada
                 </button>
-            </form>
+                <?php else: ?>
+                <form method="post" onsubmit="return confirm('¿Poner todos los partidos programados de la Jornada <?= (int) $jornada['numero'] ?> en curso?');" style="margin:0;">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="accion" value="activar_jornada">
+                    <input type="hidden" name="jornada_id" value="<?= (int) $jornada['id'] ?>">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <span class="ms">play_circle</span> Iniciar jornada
+                    </button>
+                </form>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
         <div class="table-wrap">
