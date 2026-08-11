@@ -105,13 +105,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $creados = 0;
         $actualizados = 0;
+        $omitidos = 0;
         try {
             $db->beginTransaction();
             foreach ($filas as $f) {
+                // Buscar coincidencia por número: primero activo, luego cualquiera
                 $existente = $db->queryOne(
-                    "SELECT id FROM jugadores WHERE equipo_id = ? AND numero = ?",
+                    "SELECT id FROM jugadores WHERE equipo_id = ? AND numero = ? AND activo = 1 LIMIT 1",
                     [$f['equipoId'], $f['numero']]
                 );
+                if (!$existente) {
+                    $existente = $db->queryOne(
+                        "SELECT id FROM jugadores WHERE equipo_id = ? AND numero = ? LIMIT 1",
+                        [$f['equipoId'], $f['numero']]
+                    );
+                }
+
                 if ($existente) {
                     $db->execute(
                         "UPDATE jugadores SET nombre=?, posicion=?, cedula=?, activo=?, foto_url=COALESCE(?, foto_url) WHERE id=?",
@@ -119,6 +128,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                     $actualizados++;
                 } else {
+                    // Al insertar un jugador activo verificar que no haya otro activo con ese número
+                    if ($f['activo'] === 1) {
+                        $conflicto = $db->queryOne(
+                            "SELECT id FROM jugadores WHERE equipo_id = ? AND numero = ? AND activo = 1",
+                            [$f['equipoId'], $f['numero']]
+                        );
+                        if ($conflicto) {
+                            $omitidos++;
+                            continue;
+                        }
+                    }
                     $db->insert(
                         "INSERT INTO jugadores (equipo_id, nombre, numero, posicion, cedula, activo, foto_url) VALUES (?,?,?,?,?,?,?)",
                         [$f['equipoId'], $f['nombre'], $f['numero'], $f['posicion'], $f['cedula'], $f['activo'], $f['fotoUrl']]
@@ -127,7 +147,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             $db->commit();
-            set_flash('success', "Importación completa: $creados jugador(es) creado(s), $actualizados actualizado(s).");
+            $msg = "Importación completa: $creados jugador(es) creado(s), $actualizados actualizado(s).";
+            if ($omitidos > 0) {
+                $msg .= " $omitidos omitido(s) por número activo duplicado.";
+            }
+            set_flash('success', $msg);
             redirect('/admin/equipos/index.php');
         } catch (Exception $e) {
             $db->rollBack();

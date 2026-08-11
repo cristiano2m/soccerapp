@@ -95,8 +95,8 @@ CREATE TABLE IF NOT EXISTS jugadores (
     foto_url VARCHAR(255),
     activo TINYINT(1) DEFAULT 1,
     FOREIGN KEY (equipo_id) REFERENCES equipos(id) ON DELETE CASCADE,
-    INDEX idx_equipo (equipo_id),
-    UNIQUE KEY uq_numero_equipo (equipo_id, numero)
+    INDEX idx_equipo (equipo_id)
+    -- unicidad solo para jugadores activos se maneja a nivel de aplicación
 );
 
 -- ══════════════════════════════════════════════

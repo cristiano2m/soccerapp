@@ -66,29 +66,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            if (empty($errors)) {
-                try {
-                    if ($jid > 0) {
-                        $db->execute(
-                            "UPDATE jugadores SET nombre=?, numero=?, posicion=?, cedula=?, foto_url=?, activo=? WHERE id=? AND equipo_id=?",
-                            [$nombre, $numero, $posicion, $cedula, $fotoUrl, $activo, $jid, $equipo['id']]
-                        );
-                        set_flash('success', 'Jugador actualizado.');
-                    } else {
-                        $db->insert(
-                            "INSERT INTO jugadores (equipo_id, nombre, numero, posicion, cedula, foto_url, activo) VALUES (?,?,?,?,?,?,?)",
-                            [$equipo['id'], $nombre, $numero, $posicion, $cedula, $fotoUrl, $activo]
-                        );
-                        set_flash('success', 'Jugador agregado a la nómina.');
-                    }
-                    redirect('/admin/equipos/jugadores.php?equipo_id=' . $equipo['id']);
-                } catch (PDOException $e) {
-                    if ($e->getCode() === '23000') {
-                        $errors[] = 'Ya existe un jugador con ese número en este equipo.';
-                    } else {
-                        throw $e;
-                    }
+            // Solo puede haber un jugador ACTIVO por número en el equipo
+            if (empty($errors) && $activo === 1) {
+                $duplicado = $db->queryOne(
+                    "SELECT id FROM jugadores WHERE equipo_id = ? AND numero = ? AND activo = 1 AND id != ?",
+                    [$equipo['id'], $numero, $jid]
+                );
+                if ($duplicado) {
+                    $errors[] = 'Ya existe un jugador activo con el número ' . $numero . ' en este equipo. Desactiva al anterior antes de asignar ese número.';
                 }
+            }
+
+            if (empty($errors)) {
+                if ($jid > 0) {
+                    $db->execute(
+                        "UPDATE jugadores SET nombre=?, numero=?, posicion=?, cedula=?, foto_url=?, activo=? WHERE id=? AND equipo_id=?",
+                        [$nombre, $numero, $posicion, $cedula, $fotoUrl, $activo, $jid, $equipo['id']]
+                    );
+                    set_flash('success', 'Jugador actualizado.');
+                } else {
+                    $db->insert(
+                        "INSERT INTO jugadores (equipo_id, nombre, numero, posicion, cedula, foto_url, activo) VALUES (?,?,?,?,?,?,?)",
+                        [$equipo['id'], $nombre, $numero, $posicion, $cedula, $fotoUrl, $activo]
+                    );
+                    set_flash('success', 'Jugador agregado a la nómina.');
+                }
+                redirect('/admin/equipos/jugadores.php?equipo_id=' . $equipo['id']);
             }
 
             $editJugador = [
