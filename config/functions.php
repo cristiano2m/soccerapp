@@ -86,6 +86,15 @@ function team_badge(string $nombre, ?string $abreviatura, ?string $colorHex, ?st
     return '<span class="team-logo" style="width:' . $size . 'px;height:' . $size . 'px;background:' . h($color) . ';">' . h(mb_strtoupper($sigla)) . '</span>';
 }
 
+// Renderiza la foto de un jugador, o un círculo con ícono genérico si no tiene foto
+function jugador_avatar(?string $fotoUrl, string $nombre): string
+{
+    if (!empty($fotoUrl)) {
+        return '<img src="' . h($fotoUrl) . '" alt="' . h($nombre) . '" class="player-photo">';
+    }
+    return '<span class="player-photo player-photo-placeholder"><span class="ms">person</span></span>';
+}
+
 // ══════════════════════════════════════════════
 // SUBIDA DE IMÁGENES (logos, fotos)
 // ══════════════════════════════════════════════
@@ -235,7 +244,7 @@ function obtener_proxima_jornada(int $torneo_id): ?array
          JOIN equipos el ON el.id = p.equipo_local_id
          JOIN equipos ev ON ev.id = p.equipo_visita_id
          WHERE p.jornada_id = ?
-         ORDER BY p.hora ASC, p.id ASC",
+         ORDER BY p.hora ASC, p.cancha ASC, p.id ASC",
         [$jornada['id']]
     );
 

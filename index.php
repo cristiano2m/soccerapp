@@ -254,6 +254,35 @@ if ($torneo) {
     $ultimosResultados = obtener_ultimos_resultados($torneo['id'], 3);
     $goleadores = obtener_goleadores($torneo['id'], 5);
 
+    $tarjetasAmarillas = [];
+    $tarjetasRojas = [];
+    $ultimaJornadaConResultado = $db->queryOne(
+        "SELECT j.id, j.numero FROM jornadas j
+         WHERE j.torneo_id = ?
+           AND EXISTS (SELECT 1 FROM partidos p WHERE p.jornada_id = j.id AND p.estado = 'finalizado')
+         ORDER BY j.numero DESC LIMIT 1",
+        [$torneo['id']]
+    );
+    if ($ultimaJornadaConResultado) {
+        $tarjetas = $db->query(
+            "SELECT t.tipo, j2.nombre AS jugador_nombre, j2.numero AS jugador_numero, e.nombre AS equipo_nombre
+             FROM tarjetas t
+             JOIN jugadores j2 ON j2.id = t.jugador_id
+             JOIN equipos e ON e.id = j2.equipo_id
+             JOIN partidos p ON p.id = t.partido_id
+             WHERE p.jornada_id = ?
+             ORDER BY j2.nombre ASC",
+            [$ultimaJornadaConResultado['id']]
+        );
+        foreach ($tarjetas as $t) {
+            if ($t['tipo'] === 'amarilla') {
+                $tarjetasAmarillas[] = $t;
+            } else {
+                $tarjetasRojas[] = $t;
+            }
+        }
+    }
+
     $stats['equipos'] = count($equipos);
     $stats['jornadas'] = (int) ($db->queryOne("SELECT COUNT(*) AS c FROM jornadas WHERE torneo_id = ?", [$torneo['id']])['c'] ?? 0);
     $stats['partidos'] = (int) ($db->queryOne("SELECT COUNT(*) AS c FROM partidos WHERE torneo_id = ? AND estado = 'finalizado'", [$torneo['id']])['c'] ?? 0);
@@ -363,10 +392,29 @@ require __DIR__ . '/views/layout/header.php';
 <section class="section">
     <div class="container">
         <h2 class="section-title"><span class="ms">calendar_month</span> Próxima jornada — Jornada <?= (int) $proximaJornada['numero'] ?></h2>
-        <div class="grid grid-3">
-            <?php foreach ($proximaJornada['partidos'] as $p): $p['jornada_numero'] = $proximaJornada['numero']; ?>
-                <?php $partido = $p; require __DIR__ . '/views/components/partido-card.php'; ?>
-            <?php endforeach; ?>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Local</th>
+                        <th></th>
+                        <th>Visita</th>
+                        <th>Cancha</th>
+                        <th>Hora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($proximaJornada['partidos'] as $p): ?>
+                    <tr>
+                        <td><div class="team-row"><?= team_badge($p['local_nombre'], null, $p['local_color'], $p['local_logo'], 40) ?> <?= h($p['local_nombre']) ?></div></td>
+                        <td class="pts">vs</td>
+                        <td><div class="team-row"><?= team_badge($p['visita_nombre'], null, $p['visita_color'], $p['visita_logo'], 40) ?> <?= h($p['visita_nombre']) ?></div></td>
+                        <td><?= h($p['cancha'] ?? '') ?: '—' ?></td>
+                        <td><?= $p['hora'] ? h(substr($p['hora'], 0, 5)) : '-' ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </section>
@@ -416,6 +464,58 @@ require __DIR__ . '/views/layout/header.php';
             <?php endforeach; ?>
         </div>
         <p style="margin-top:16px;"><a class="btn btn-outline btn-sm" href="<?= BASE_URL ?>/public/resultados.php">Ver todos los resultados</a></p>
+    </div>
+</section>
+<?php endif; ?>
+
+<?php if (!empty($tarjetasAmarillas) || !empty($tarjetasRojas)): ?>
+<section class="section section-light">
+    <div class="container">
+        <h2 class="section-title"><span class="ms">style</span> Tarjetas — Jornada <?= (int) $ultimaJornadaConResultado['numero'] ?></h2>
+        <div class="grid grid-2">
+            <div>
+                <h3 class="section-title" style="margin-bottom:12px;">🟡 Amarillas (<?= count($tarjetasAmarillas) ?>)</h3>
+                <?php if (empty($tarjetasAmarillas)): ?>
+                    <p class="text-muted">Sin tarjetas amarillas esta jornada.</p>
+                <?php else: ?>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th></tr></thead>
+                        <tbody>
+                            <?php foreach ($tarjetasAmarillas as $t): ?>
+                            <tr>
+                                <td class="pts"><?= (int) $t['jugador_numero'] ?></td>
+                                <td><?= h($t['jugador_nombre']) ?></td>
+                                <td><?= h($t['equipo_nombre']) ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+            </div>
+            <div>
+                <h3 class="section-title" style="margin-bottom:12px;">🔴 Rojas (<?= count($tarjetasRojas) ?>)</h3>
+                <?php if (empty($tarjetasRojas)): ?>
+                    <p class="text-muted">Sin tarjetas rojas esta jornada.</p>
+                <?php else: ?>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th></tr></thead>
+                        <tbody>
+                            <?php foreach ($tarjetasRojas as $t): ?>
+                            <tr>
+                                <td class="pts"><?= (int) $t['jugador_numero'] ?></td>
+                                <td><?= h($t['jugador_nombre']) ?></td>
+                                <td><?= h($t['equipo_nombre']) ?> <?= $t['tipo'] === 'doble_amarilla' ? '<span style="font-size:0.75rem;color:var(--color-gray);">(2ª amarilla)</span>' : '' ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </section>
 <?php endif; ?>

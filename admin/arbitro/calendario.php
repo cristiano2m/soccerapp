@@ -38,10 +38,17 @@ require __DIR__ . '/../../views/layout/sidebar-arbitro.php';
     if (empty($partidos)) continue;
 ?>
 <div class="card" style="margin-bottom:18px;">
-    <h2 class="section-title">
-        Jornada <?= (int) $jornada['numero'] ?>
-        <?= !empty($jornada['fecha']) ? '<span class="text-muted" style="font-weight:400;font-size:0.85rem;"> · ' . h($jornada['fecha']) . '</span>' : '' ?>
-    </h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+        <h2 class="section-title" style="margin-bottom:0;">
+            Jornada <?= (int) $jornada['numero'] ?>
+            <?= !empty($jornada['fecha']) ? '<span class="text-muted" style="font-weight:400;font-size:0.85rem;"> · ' . h($jornada['fecha']) . '</span>' : '' ?>
+        </h2>
+        <?php if (!empty(array_filter($partidos, fn($p) => $p['estado'] === 'en_curso'))): ?>
+        <a class="btn btn-primary btn-sm" href="<?= BASE_URL ?>/admin/acta/jornada.php?jornada_id=<?= (int) $jornada['id'] ?>" target="_blank">
+            <span class="ms">print</span> Actas Jornada <?= (int) $jornada['numero'] ?>
+        </a>
+        <?php endif; ?>
+    </div>
     <?php if (empty($partidos)): ?>
         <p class="text-muted">Sin partidos en esta jornada.</p>
     <?php else: ?>

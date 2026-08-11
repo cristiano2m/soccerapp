@@ -1411,6 +1411,52 @@
     margin-bottom: 4px;
 }
 
+/* ── Plantel (página Nómina) ── */
+.player-card {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px;
+    text-align: center;
+}
+
+.player-photo {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 10px;
+    display: block;
+}
+
+.player-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-light);
+    color: var(--color-gray);
+    font-size: 2rem;
+}
+
+.player-card .player-numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    color: var(--color-dark);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.player-card .player-nombre {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
 /* ── Goleadores ── */
 .scorer-row {
     display: flex;

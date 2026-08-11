@@ -20,7 +20,7 @@ if ($torneo) {
              JOIN equipos el ON el.id = p.equipo_local_id
              JOIN equipos ev ON ev.id = p.equipo_visita_id
              LEFT JOIN resultados r ON r.partido_id = p.id
-             WHERE p.torneo_id = ?
+             WHERE p.torneo_id = ? AND p.estado IN ('finalizado', 'en_curso')
              ORDER BY p.jornada_id ASC, p.hora ASC, p.id ASC",
             [$torneo['id']]
         );
@@ -37,13 +37,14 @@ require __DIR__ . '/../views/layout/header.php';
 <section class="section">
     <div class="container">
         <h1 class="section-title"><span class="ms ms-lg">calendar_month</span> Calendario</h1>
-        <?php if (!$torneo || empty($jornadas)): ?>
+        <?php if (!$torneo || empty($partidosPorJornada)): ?>
             <p class="text-muted">El calendario todavía no está disponible.</p>
         <?php else: ?>
             <?php foreach ($jornadas as $jornada): ?>
+                <?php if (empty($partidosPorJornada[$jornada['id']])) continue; ?>
             <h2 class="section-title" style="margin-top:24px;">Jornada <?= (int) $jornada['numero'] ?><?= !empty($jornada['fecha']) ? ' · ' . h($jornada['fecha']) : '' ?></h2>
             <div class="grid grid-3">
-                <?php foreach (($partidosPorJornada[$jornada['id']] ?? []) as $p): ?>
+                <?php foreach ($partidosPorJornada[$jornada['id']] as $p): ?>
                     <?php $partido = $p; require __DIR__ . '/../views/components/partido-card.php'; ?>
                 <?php endforeach; ?>
             </div>

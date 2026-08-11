@@ -7,10 +7,6 @@ $torneo = obtener_torneo_activo();
 $equipos = [];
 if ($torneo) {
     $equipos = $db->query("SELECT * FROM equipos WHERE torneo_id = ? AND activo = 1 ORDER BY nombre ASC", [$torneo['id']]);
-    foreach ($equipos as &$eq) {
-        $eq['jugadores'] = $db->query("SELECT nombre, numero, posicion FROM jugadores WHERE equipo_id = ? AND activo = 1 ORDER BY numero ASC", [$eq['id']]);
-    }
-    unset($eq);
 }
 
 $pageTitle = 'Equipos';
@@ -29,17 +25,7 @@ require __DIR__ . '/../views/layout/header.php';
                     <?= team_badge($eq['nombre'], $eq['abreviatura'], $eq['color_hex'], $eq['logo_url'], 64) ?>
                     <h3><?= h($eq['nombre']) ?></h3>
                     <?php if (!empty($eq['delegado'])): ?><p class="text-muted" style="font-size:0.85rem;">Delegado: <?= h($eq['delegado']) ?></p><?php endif; ?>
-                    <details style="margin-top:10px; text-align:left;">
-                        <summary style="cursor:pointer; font-weight:700; text-align:center;">Plantel (<?= count($eq['jugadores']) ?>)</summary>
-                        <table style="margin-top:10px;">
-                            <thead><tr><th>#</th><th>Nombre</th><th>Posición</th></tr></thead>
-                            <tbody>
-                            <?php foreach ($eq['jugadores'] as $j): ?>
-                                <tr><td><?= (int) $j['numero'] ?></td><td><?= h($j['nombre']) ?></td><td><?= h($j['posicion']) ?></td></tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </details>
+                    <a class="btn btn-primary btn-sm" style="margin-top:10px;" href="<?= BASE_URL ?>/public/equipo.php?id=<?= (int) $eq['id'] ?>"><span class="ms">groups</span> Nómina</a>
                 </div>
                 <?php endforeach; ?>
             </div>

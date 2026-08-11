@@ -38,6 +38,7 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
     <div class="actions">
         <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/importar.php"><span class="ms">upload_file</span> Importar equipos</a>
         <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/jugadores-importar.php"><span class="ms">upload_file</span> Importar jugadores</a>
+        <a class="btn btn-outline" href="<?= BASE_URL ?>/admin/equipos/jugadores-exportar.php"><span class="ms">download</span> Exportar jugadores</a>
         <a class="btn btn-primary" href="<?= BASE_URL ?>/admin/equipos/form.php">+ Nuevo equipo</a>
     </div>
 </div>

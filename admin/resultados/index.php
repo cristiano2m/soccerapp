@@ -41,13 +41,31 @@ $sql .= " ORDER BY j.numero ASC, p.hora ASC, p.id ASC";
 
 $partidos = $db->query($sql, $params);
 $jornadas = $db->query("SELECT numero FROM jornadas WHERE torneo_id = ? ORDER BY numero DESC", [$torneo['id']]);
+$jornadasEnCurso = $db->query(
+    "SELECT DISTINCT j.id, j.numero FROM jornadas j
+     JOIN partidos p ON p.jornada_id = j.id
+     WHERE j.torneo_id = ? AND p.estado = 'en_curso'
+     ORDER BY j.numero ASC",
+    [$torneo['id']]
+);
 
 $pageTitle = 'Resultados';
 $layout = 'admin';
 require __DIR__ . '/../../views/layout/header.php';
 require __DIR__ . '/../../views/layout/sidebar-admin.php';
 ?>
-<h1><span class="ms ms-lg">sports_soccer</span> Resultados</h1>
+<div class="toolbar">
+    <h1><span class="ms ms-lg">sports_soccer</span> Resultados</h1>
+    <?php if (!empty($jornadasEnCurso)): ?>
+    <div class="actions">
+        <?php foreach ($jornadasEnCurso as $jec): ?>
+        <a class="btn btn-primary" href="<?= BASE_URL ?>/admin/acta/jornada.php?jornada_id=<?= (int) $jec['id'] ?>" target="_blank">
+            <span class="ms">print</span> Actas Jornada <?= (int) $jec['numero'] ?>
+        </a>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+</div>
 
 <div class="card" style="margin-bottom:18px;">
     <form method="get" class="form-row" style="align-items:flex-end;">
