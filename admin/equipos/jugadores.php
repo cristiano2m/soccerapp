@@ -197,7 +197,7 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
                     <tr><td colspan="5" class="text-muted">Sin jugadores registrados.</td></tr>
                 <?php endif; ?>
                 <?php foreach ($jugadores as $j): ?>
-                    <tr>
+                    <tr <?= !$j['activo'] ? 'style="color:#c00;text-decoration:line-through;opacity:0.75;"' : '' ?>>
                         <td><?= (int) $j['numero'] ?></td>
                         <td><?= h($j['nombre']) ?></td>
                         <td><?= h($j['posicion']) ?></td>
