@@ -23,7 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'elimi
 }
 
 $equipos = $db->query(
-    "SELECT e.*, (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.id) AS num_jugadores
+    "SELECT e.*,
+            (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.id AND j.activo = 1) AS num_activos,
+            (SELECT COUNT(*) FROM jugadores j WHERE j.equipo_id = e.id AND j.activo = 0) AS num_inactivos
      FROM equipos e WHERE e.torneo_id = ? ORDER BY e.nombre ASC",
     [$torneo['id']]
 );
@@ -72,7 +74,12 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
                     <td><?= h($eq['abreviatura']) ?></td>
                     <td><?= h($eq['delegado']) ?></td>
                     <td><?= h($eq['telefono']) ?></td>
-                    <td><?= (int) $eq['num_jugadores'] ?></td>
+                    <td>
+                        <span style="color:#16a34a;font-weight:600;"><?= (int) $eq['num_activos'] ?></span>
+                        <?php if ($eq['num_inactivos'] > 0): ?>
+                            <span style="color:#c00;font-size:0.85rem;"> (<?= (int) $eq['num_inactivos'] ?>)</span>
+                        <?php endif; ?>
+                    </td>
                     <td><?= $eq['activo'] ? 'Sí' : 'No' ?></td>
                     <td class="actions">
                         <a class="btn btn-outline btn-sm" href="<?= BASE_URL ?>/admin/equipos/jugadores.php?equipo_id=<?= (int) $eq['id'] ?>">Nómina</a>
