@@ -127,7 +127,7 @@ require __DIR__ . '/../../views/layout/sidebar-admin.php';
                         <?php if (!empty($p['wo_local']) || !empty($p['wo_visita'])): ?> <span class="badge badge-wo">W.O.</span><?php endif; ?>
                     </td>
                     <td class="actions">
-                        <a class="btn btn-primary btn-sm" href="<?= BASE_URL ?>/admin/resultados/partido.php?id=<?= (int) $p['id'] ?>"><span class="ms">edit_note</span> Registrar</a>
+                        <a class="btn btn-primary btn-sm" href="<?= BASE_URL ?>/admin/resultados/partido.php?id=<?= (int) $p['id'] ?>&jornada=<?= $jornadaFiltro ?>&estado=<?= h($estadoFiltro) ?>"><span class="ms">edit_note</span> Registrar</a>
                         <?php if ($p['estado'] === 'finalizado'): ?>
                             <a class="btn btn-dark btn-sm" href="<?= BASE_URL ?>/admin/acta/index.php?id=<?= (int) $p['id'] ?>" target="_blank"><span class="ms">description</span> Acta</a>
                         <?php endif; ?>

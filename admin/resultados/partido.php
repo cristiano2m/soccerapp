@@ -11,6 +11,16 @@ if (!$torneo) {
 }
 
 $id = (int) ($_GET['id'] ?? 0);
+
+// Preservar filtros del listado para volver a la misma jornada/estado
+$qs = '';
+if (!empty($_GET['jornada']) && (int) $_GET['jornada'] > 0) {
+    $qs .= '&jornada=' . (int) $_GET['jornada'];
+}
+if (!empty($_GET['estado'])) {
+    $qs .= '&estado=' . urlencode($_GET['estado']);
+}
+$backUrl = '/admin/resultados/index.php' . ($qs ? '?' . ltrim($qs, '&') : '');
 $partido = $db->queryOne(
     "SELECT p.*, j.numero AS jornada_numero,
             el.nombre AS local_nombre, el.color_hex AS local_color, el.logo_url AS local_logo, el.abreviatura AS local_abrev,
@@ -25,7 +35,7 @@ $partido = $db->queryOne(
 
 if (!$partido) {
     set_flash('error', 'Partido no encontrado.');
-    redirect('/admin/resultados/index.php');
+    redirect($backUrl);
 }
 
 $jugadoresLocal = $db->query("SELECT id, nombre, numero FROM jugadores WHERE equipo_id = ? AND activo = 1 ORDER BY numero ASC", [$partido['equipo_local_id']]);
@@ -154,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $db->commit();
                 set_flash('success', 'Resultado registrado correctamente.');
-                redirect('/admin/resultados/index.php');
+                redirect($backUrl);
             } catch (Exception $e) {
                 $db->rollBack();
                 $errors[] = 'No se pudo guardar el resultado: ' . $e->getMessage();
