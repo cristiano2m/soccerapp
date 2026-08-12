@@ -57,7 +57,7 @@ $partidos = $db->query(
      JOIN equipos ev ON ev.id = p.equipo_visita_id
      LEFT JOIN resultados r ON r.partido_id = p.id
      WHERE p.jornada_id = ?
-     ORDER BY p.hora ASC, p.id ASC",
+     ORDER BY p.hora ASC, p.cancha ASC, p.id ASC",
     [$jornadaId]
 );
 

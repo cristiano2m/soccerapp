@@ -21,7 +21,7 @@ if ($torneo) {
              JOIN equipos ev ON ev.id = p.equipo_visita_id
              LEFT JOIN resultados r ON r.partido_id = p.id
              WHERE p.torneo_id = ? AND p.estado IN ('finalizado', 'en_curso')
-             ORDER BY p.jornada_id ASC, p.hora ASC, p.id ASC",
+             ORDER BY p.jornada_id ASC, p.hora ASC, p.cancha ASC, p.id ASC",
             [$torneo['id']]
         );
         foreach ($partidos as $p) {

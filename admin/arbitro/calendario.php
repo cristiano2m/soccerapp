@@ -32,7 +32,7 @@ require __DIR__ . '/../../views/layout/sidebar-arbitro.php';
          JOIN equipos ev ON ev.id = p.equipo_visita_id
          LEFT JOIN resultados r ON r.partido_id = p.id
          WHERE p.jornada_id = ? AND p.estado IN ('en_curso', 'finalizado')
-         ORDER BY p.hora ASC, p.id ASC",
+         ORDER BY p.hora ASC, p.cancha ASC, p.id ASC",
         [(int) $jornada['id']]
     );
     if (empty($partidos)) continue;
