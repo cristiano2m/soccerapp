@@ -37,7 +37,7 @@ if (in_array($estadoFiltro, ['programado', 'en_curso', 'finalizado', 'suspendido
     $sql .= " AND p.estado = ?";
     $params[] = $estadoFiltro;
 }
-$sql .= " ORDER BY j.numero ASC, p.hora ASC, p.cancha ASC, p.id ASC";
+$sql .= " ORDER BY j.numero ASC, p.hora ASC, p.cancha IS NULL ASC, p.cancha ASC, p.id ASC";
 
 $partidos = $db->query($sql, $params);
 $jornadas = $db->query("SELECT numero FROM jornadas WHERE torneo_id = ? ORDER BY numero DESC", [$torneo['id']]);

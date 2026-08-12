@@ -35,7 +35,7 @@ $partidos = $db->query(
      LEFT JOIN usuarios a2  ON a2.id  = p.arbitro_id2
      LEFT JOIN usuarios a3  ON a3.id  = p.arbitro_id3
      WHERE p.jornada_id = ?
-     ORDER BY p.hora ASC, p.cancha ASC, p.id ASC",
+     ORDER BY p.hora ASC, p.cancha IS NULL ASC, p.cancha ASC, p.id ASC",
     [$jornada['id']]
 );
 

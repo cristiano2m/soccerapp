@@ -244,7 +244,7 @@ function obtener_proxima_jornada(int $torneo_id): ?array
          JOIN equipos el ON el.id = p.equipo_local_id
          JOIN equipos ev ON ev.id = p.equipo_visita_id
          WHERE p.jornada_id = ?
-         ORDER BY p.hora ASC, p.cancha ASC, p.id ASC",
+         ORDER BY p.hora ASC, p.cancha IS NULL ASC, p.cancha ASC, p.id ASC",
         [$jornada['id']]
     );
 
